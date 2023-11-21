@@ -541,6 +541,13 @@ class ReactivePlanner(object):
             cl_states['acceleration'] = trajectory.cartesian.a[i]
             cl_states['orientation'] = trajectory.cartesian.theta[i]
             cl_states['yaw_rate'] = trajectory.cartesian.kappa[i]
+            cl_states['kappa'] = trajectory.cartesian.kappa[i]
+            cl_states['frenet_s'] = trajectory.curvilinear.s[i]
+            cl_states['frenet_d'] = trajectory.curvilinear.d[i]
+            cl_states['frenet_s_dot'] = trajectory.curvilinear.s_dot[i]
+            cl_states['frenet_s_ddot'] = trajectory.curvilinear.s_ddot[i]
+            cl_states['frenet_d_dot'] = trajectory.curvilinear.d_dot[i]
+            cl_states['frenet_d_ddot'] = trajectory.curvilinear.d_ddot[i]
             cl_list.append(CustomState(**cl_states))
 
             lon_list.append(
