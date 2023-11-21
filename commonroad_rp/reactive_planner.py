@@ -21,7 +21,7 @@ from commonroad.geometry.shape import Rectangle
 from commonroad.prediction.prediction import TrajectoryPrediction
 from commonroad.scenario.obstacle import DynamicObstacle, ObstacleType
 from commonroad.scenario.trajectory import Trajectory
-from commonroad.scenario.state import CustomState, InputState
+from commonroad.scenario.state import CustomState, InputState, InitialState
 from commonroad.scenario.scenario import Scenario
 
 # commonroad_dc
@@ -1133,4 +1133,11 @@ class ReactivePlanner(object):
         shape = Rectangle(self.vehicle_params.length, self.vehicle_params.width)
         # get trajectory prediction
         prediction = TrajectoryPrediction(trajectory, shape)
-        return DynamicObstacle(obstacle_id, ObstacleType.CAR, shape, trajectory.state_list[0], prediction)
+        inital_state = InitialState(
+            time_step=trajectory.state_list[0].time_step,
+            position=trajectory.state_list[0].position,
+            orientation=trajectory.state_list[0].orientation,
+            velocity=trajectory.state_list[0].velocity,
+            yaw_rate=trajectory.state_list[0].yaw_rate,
+        )
+        return DynamicObstacle(obstacle_id, ObstacleType.CAR, shape, inital_state, prediction)
