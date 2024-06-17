@@ -65,7 +65,9 @@ class BaseConfiguration:
         try:
             value = self.__getattribute__(item)
         except AttributeError as e:
-            raise KeyError(f"{item} is not a parameter of {self.__class__.__name__}") from e
+            raise KeyError(
+                f"{item} is not a parameter of {self.__class__.__name__}"
+            ) from e
         return value
 
     def __setitem__(self, key: str, value: Any):
@@ -78,11 +80,17 @@ class BaseConfiguration:
         try:
             self.__setattr__(key, value)
         except AttributeError as e:
-            raise KeyError(f"{key} is not a parameter of {self.__class__.__name__}") from e
+            raise KeyError(
+                f"{key} is not a parameter of {self.__class__.__name__}"
+            ) from e
 
     @classmethod
-    def load(cls, file_path: Union[pathlib.Path, str], scenario_name: str, validate_types: bool = True) \
-            -> 'ReactivePlannerConfiguration':
+    def load(
+        cls,
+        file_path: Union[pathlib.Path, str],
+        scenario_name: str,
+        validate_types: bool = True,
+    ) -> "ReactivePlannerConfiguration":
         """
         Loads config file and creates parameter class.
 
@@ -92,10 +100,14 @@ class BaseConfiguration:
         :return: Base parameter class.
         """
         file_path = pathlib.Path(file_path)
-        assert file_path.suffix == ".yaml", f"File type {file_path.suffix} is unsupported! Please use .yaml!"
+        assert (
+            file_path.suffix == ".yaml"
+        ), f"File type {file_path.suffix} is unsupported! Please use .yaml!"
         loaded_yaml = OmegaConf.load(file_path)
         if validate_types:
-            OmegaConf.merge(OmegaConf.structured(ReactivePlannerConfiguration), loaded_yaml)
+            OmegaConf.merge(
+                OmegaConf.structured(ReactivePlannerConfiguration), loaded_yaml
+            )
         params = _dict_to_params(OmegaConf.to_object(loaded_yaml), cls)
         params.general.set_path_scenario(scenario_name)
         return params
@@ -121,8 +133,15 @@ class PlanningConfiguration(BaseConfiguration):
     # kinematic constraints to check.
     # The list can contain these constraints: velocity, acceleration, kappa, kappa_dot,
     # yaw_rate (Exact naming important!!)
-    constraints_to_check: List[str] = \
-        field(default_factory=lambda: ["velocity", "acceleration", "kappa", "kappa_dot", "yaw_rate"])
+    constraints_to_check: List[str] = field(
+        default_factory=lambda: [
+            "velocity",
+            "acceleration",
+            "kappa",
+            "kappa_dot",
+            "yaw_rate",
+        ]
+    )
     # lookahead in dt*standstill_lookahead seconds if current velocity <= 0.1 and after specified time too
     standstill_lookahead: int = 10
 
@@ -199,7 +218,9 @@ class VehicleConfiguration(BaseConfiguration):
 
     id_type_vehicle: int = 2
     # get vehicle parameters from CommonRoad vehicle models given cr_vehicle_id
-    vehicle_parameters: VehicleParameters = VehicleParameterMapping.from_vehicle_type(VehicleType(id_type_vehicle))
+    vehicle_parameters: VehicleParameters = VehicleParameterMapping.from_vehicle_type(
+        VehicleType(id_type_vehicle)
+    )
 
     # get dimensions from given vehicle ID
     length: float = vehicle_parameters.l
@@ -262,8 +283,12 @@ class ReactivePlannerConfiguration(BaseConfiguration):
     def name_scenario(self) -> str:
         return self.general.name_scenario
 
-    def update(self, scenario: Scenario = None, planning_problem: PlanningProblem = None,
-               state_initial: InitialState = None):
+    def update(
+        self,
+        scenario: Scenario = None,
+        planning_problem: PlanningProblem = None,
+        state_initial: InitialState = None,
+    ):
         """
         Updates configuration based on the given attributes.
         Function used to construct initial configuration before planner initialization and update configuration during
@@ -283,8 +308,9 @@ class ReactivePlannerConfiguration(BaseConfiguration):
         if scenario is None and planning_problem is None:
             if self.scenario is None or self.planning_problem is None:
                 # read original scenario and pp from scenario file
-                self.scenario, self.planning_problem, self.planning_problem_set = \
+                self.scenario, self.planning_problem, self.planning_problem_set = (
                     load_scenario_and_planning_problem(self.general.path_scenario)
+                )
             else:
                 # keep previously stored scenario and planning problem
                 pass
@@ -292,8 +318,14 @@ class ReactivePlannerConfiguration(BaseConfiguration):
             raise RuntimeError("ReactiveParams::update: Scenario or Planning not None")
 
         # Check that scenario and planning problem are set
-        assert self.scenario is not None, "<Configuration.update()>: no scenario has been specified"
-        assert self.planning_problem is not None, "<Configuration.update()>: no planning problem has been specified"
+        assert (
+            self.scenario is not None
+        ), "<Configuration.update()>: no scenario has been specified"
+        assert (
+            self.planning_problem is not None
+        ), "<Configuration.update()>: no planning problem has been specified"
 
         # update initial state for planning if explicitly given
-        self.planning.state_initial = state_initial if state_initial else self.planning_problem.initial_state
+        self.planning.state_initial = (
+            state_initial if state_initial else self.planning_problem.initial_state
+        )
